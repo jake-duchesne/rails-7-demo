@@ -1,4 +1,5 @@
-@import "./components/colors.css";
+@import "./components/colors.scss";
+@import "./components/buttons.css";
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
