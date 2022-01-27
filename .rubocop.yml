@@ -1,0 +1,102 @@
+require:
+  - rubocop-minitest
+  - rubocop-rails
+
+AllCops:
+  NewCops: enable
+  Include:
+    - app/**/*.rb
+    - lib/**/*.rb
+    - test/**/*test.rb
+  Exclude:
+    - bin/**/*
+    - db/**/*
+Style/Documentation:
+  Enabled: false
+
+# Commonly used screens these days easily fit more than 80 characters.
+Layout/LineLength:
+  Max: 120
+  IgnoredPatterns: ['(\A|\s)#']
+
+Layout/HeredocIndentation:
+  Enabled: false
+
+Metrics/BlockLength:
+  IgnoredMethods:
+    - describe
+  Exclude:
+    - test/**/*test.rb
+    - config/routes.rb
+
+# Too short methods lead to extraction of single-use methods, which can make
+# the code easier to read (by naming things), but can also clutter the class
+Metrics/MethodLength:
+  Max: 20
+
+Metrics/ClassLength:
+  Enabled: true
+  Exclude:
+    - test/**/*
+  CountAsOne: ["array", "heredoc"]
+
+# Single quotes being faster is hardly measurable and only affects parse time.
+# Enforcing double quotes reduces the times where you need to change them
+# when introducing an interpolation. Use single quotes only if their semantics
+# are needed.
+Style/StringLiterals:
+  EnforcedStyle: double_quotes
+
+# Mixing the styles looks just silly.
+Style/HashSyntax:
+  EnforcedStyle: ruby19_no_mixed_keys
+
+# has_key? and has_value? are far more readable than key? and value?
+Style/PreferredHashMethods:
+  Enabled: false
+
+Style/Lambda:
+  EnforcedStyle: literal
+
+# Either allow this style or don't. Marking it as safe with parenthesis
+# is silly. Let's try to live without them for now.
+Style/ParenthesesAroundCondition:
+  AllowSafeAssignment: false
+Lint/AssignmentInCondition:
+  AllowSafeAssignment: false
+
+# Use a clearer OO approach
+Style/RaiseArgs:
+  EnforcedStyle: compact
+
+Style/ClassAndModuleChildren:
+  Exclude:
+    - test/**/*test.rb
+
+# Fail is an alias of raise. Avoid aliases, it's more cognitive load for no gain.
+# The argument that fail should be used to abort the program is wrong too,
+# there's Kernel#abort for that.
+Style/SignalException:
+  EnforcedStyle: only_raise
+
+# Indenting the chained dots beneath each other is not supported by this cop,
+# see https://github.com/bbatsov/rubocop/issues/1633
+Layout/MultilineOperationIndentation:
+  EnforcedStyle: indented
+
+# Enforcing the names of variables? To single letter ones? Just no.
+Style/SingleLineBlockParams:
+  Enabled: false
+
+# Preference for array literal ([]) over percent (%i())
+Style/SymbolArray:
+  EnforcedStyle: brackets
+
+Naming/RescuedExceptionsVariableName:
+  PreferredName: error
+
+Naming/VariableNumber:
+  EnforcedStyle: snake_case
+
+Rails/RefuteMethods:
+  EnforcedStyle: refute
