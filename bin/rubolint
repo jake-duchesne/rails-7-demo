@@ -1,0 +1,69 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+require "fileutils"
+require "optparse"
+require "ostruct"
+
+# path to your application root.
+APP_ROOT = File.expand_path("..", __dir__)
+
+def system!(*args)
+  system(*args) || abort("\n== Command #{args} failed ==")
+end
+
+options = OpenStruct.new(touched: nil, format: nil, only: nil, autocorrect: nil)
+
+opt_parser = OptionParser.new do |opts|
+  opts.banner = "Usage: bin/rubocop [options] [file(s)]"
+  opts.on("-A", "--auto-correct", "Auto-correct") do
+    options.autocorrect = "-A"
+  end
+
+  opts.on("-t", "--touched", "Lint only files that have been touched in his Git branch") do
+    options.touched = "git diff --diff-filter=ACM --name-only main | xargs "
+  end
+
+  opts.on("-T", "--touched-compare BRANCHES", "Lint only files that have been touched in provided branches") do |branches|
+    first_branch, second_branch = branches.split("..")
+    if first_branch == second_branch
+      puts "Nothing to compare. Use binstub without flag if you want to lint."
+      exit true
+    end
+    options.touched = "git diff --diff-filter=ACM --name-only #{branches} | xargs "
+  end
+
+  opts.on("--tests-only", "Tests only") do
+    options.touched = "git diff --diff-filter=ACM --name-only main | grep test.rb | xargs "
+  end
+
+  opts.on("-s", "--summary", "Summary of offenses") do |_|
+    options.format = "-f o"
+  end
+
+  opts.on("-w", "--worst", "Worst offenders") do
+    options.format = "-f w"
+  end
+
+  opts.on("--only [COP1,COP2]", Array, "Lint only for given [COPS,...]") do |list|
+    # exit 1  if list.empty?
+    options.only = "--only #{list.join(",")}"
+  end
+
+  opts.on("-h", "--help", "Prints this help") do
+    puts opts
+    exit
+  end
+end
+files = opt_parser.parse!
+
+final_command = [
+  options.touched,
+  "rubocop --force-exclusion",
+  options.format,
+  options.only,
+  options.autocorrect,
+  files.join(' ')
+].join(" ")
+
+puts(final_command)
+system!(final_command)
